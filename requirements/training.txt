@@ -1,0 +1,25 @@
+# Requirements for Training (Development Machine)
+# Python 3.10+ recommended
+# Install with: pip install -r requirements-training.txt
+
+# YOLO Training Framework
+ultralytics>=8.0.0
+
+# Deep Learning
+torch>=1.10.0
+torchvision>=0.11.0
+
+# Model Export
+onnx>=1.12.0
+
+# Image Processing
+opencv-python>=4.5.0
+numpy>=1.21.0
+
+# Jupyter Notebook
+jupyter>=1.0.0
+ipykernel>=6.0.0
+
+# Visualization (optional)
+matplotlib>=3.5.0
+seaborn>=0.11.0

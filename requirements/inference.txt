@@ -1,0 +1,11 @@
+# Requirements for Inference (Raspberry Pi / Edge Device)
+# Python 3.10 required for OpenVINO 2022.3 compatibility
+# Install with: pip install -r requirements-inference.txt
+
+# CRITICAL: OpenVINO 2022.3 is the LAST version supporting Intel NCS2 (MYRIAD)
+# DO NOT upgrade to newer versions if using NCS2!
+openvino==2022.3.0
+
+# Image Processing
+opencv-python>=4.5.0
+numpy>=1.21.0

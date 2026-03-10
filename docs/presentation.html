@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Lukas Prendky">
+  <meta name="author" content="Tom Mafille">
+  <title>Traffic Sign Recognition on Edge</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="https://unpkg.com/reveal.js@^4/dist/reset.css">
+  <link rel="stylesheet" href="https://unpkg.com/reveal.js@^4/dist/reveal.css">
+  <style>
+    .reveal .sourceCode {  /* see #7635 */
+      overflow: visible;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="https://unpkg.com/reveal.js@^4/dist/theme/white.css" id="theme">
+  <script defer=""
+  src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css" />
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide">
+  <h1 class="title">Traffic Sign Recognition on Edge</h1>
+  <p class="author">Lukas Prendky</p>
+  <p class="author">Tom Mafille</p>
+</section>
+
+<section>
+<section id="recognition-of-traffic-signs-on-edge"
+class="title-slide slide level1">
+<h1><strong>Recognition of traffic signs on edge</strong></h1>
+
+</section>
+<section id="hardware---introducing-the-livs-car"
+class="title-slide slide level2">
+<h2><strong>Hardware - Introducing the LIVS car</strong></h2>
+<p> </p>
+<div>
+<ul>
+<li class="fragment">An assembly created by the Laboratory of Inteligent
+Embedded Systems</li>
+</ul>
+<p><br />
+</p>
+<ul>
+<li class="fragment">The car is equiped with 2 computer boards to allow
+sufficient computing power and sensitive controls</li>
+</ul>
+</div>
+</section>
+
+<section id="controls-of-the-vehicle---arduino-nano"
+class="title-slide slide level2">
+<h2><strong>Controls of the vehicle - Arduino Nano</strong></h2>
+<div>
+<ul>
+<li class="fragment">The car has a classic drive train consisting as any
+automobile, which consists of
+<ul>
+<li class="fragment">electric motor to control speed</li>
+<li class="fragment">servo motor to turn front wheels</li>
+</ul></li>
+</ul>
+<p><br />
+</p>
+<ul>
+<li class="fragment">In addition the car is equiped with an adjustable
+camera stand, which is controled by another servo motor</li>
+</ul>
+</div>
+</section>
+
+<section id="computation-power-and-communication---raspberry-pi4"
+class="title-slide slide level2">
+<h2><strong>Computation power and communication - Raspberry
+Pi4</strong></h2>
+<div>
+<ul>
+<li class="fragment">Runs Raspbian OS - Debian Linux distribution</li>
+<li class="fragment">Can be accesed via Ethernet/Wi-Fi and SSH
+protocol</li>
+<li class="fragment">Sends control commands to Arduino via Serial
+line</li>
+</ul>
+</div>
+<p><img src="https://asset.conrad.com/media10/isa/160267/c1/-/cs/002138864PI00/image.jpg" alt="Raspberry Pi4" width="300"></p>
+</section>
+
+<section id="additional-edge-computing-power---ncs-2"
+class="title-slide slide level2">
+<h2><strong>Additional Edge computing power - NCS 2</strong></h2>
+<div>
+<ul>
+<li class="fragment">USB based device designed to accelerate deep
+learning inference at the edge</li>
+<li class="fragment">Allows the offloading of the computation of deep
+learing models from the Raspberry Pi’s CPU</li>
+<li class="fragment">Supported by the OpenVINO Toolkit and
+TensorFlow</li>
+</ul>
+</div>
+<p><img src="https://res.cloudinary.com/rsc/image/upload/b_rgb:FFFFFF,c_pad,dpr_2.625,f_auto,h_214,q_auto,w_380/c_pad,h_214,w_380/R1811851-02?pgw=1" alt="Intel NCS2" width="300"/></p>
+</section>
+
+<section id="deep-learing---yolo" class="title-slide slide level2">
+<h2><strong>Deep Learing - YOLO</strong></h2>
+<p> </p>
+<div>
+<ul>
+<li class="fragment">“<strong>Y</strong>ou <strong>O</strong>nly
+<strong>L</strong>ook <strong>O</strong>nce”</li>
+<li class="fragment">Very efficient algorithm for real-time detection of
+objects in an image</li>
+<li class="fragment">Uses one pass through a convolution neural network
+to make predictions</li>
+</ul>
+</div>
+</section>
+<section class="slide level3">
+
+<p> </p>
+<ul>
+<li>To achieve higher efficiency our design specifically uses
+<em>YOLOv3-tinyu</em> model from the <em>Ultralytics</em> python package
+<ul>
+<li>lighweight version of the model</li>
+<li>was developed to enable fast inference on edge devices</li>
+</ul></li>
+</ul>
+</section>
+
+<section id="training-data" class="title-slide slide level2">
+<h2><strong>Training data</strong></h2>
+<ul>
+<li><p>Training a YOLO neural network in general requires hundreds of
+annotated images</p></li>
+<li><p>We soon realised it was not realistic to create such amount of
+data by ourselves</p></li>
+</ul>
+</section>
+
+<section id="annotation-of-the-images-example"
+class="title-slide slide level2">
+<h2><strong>Annotation of the images example</strong></h2>
+<p> </p>
+<p><code>9 | 0.52 | 0.52 | 0.75 | 0.77</code></p>
+<p><code>7 | 0.53 | 0.31 | 0.16 | 0.31</code></p>
+<p><code>6 | 0.53 | 0.56 | 0.60 | 0.56</code></p>
+</section>
+
+<section id="training-data-1" class="title-slide slide level2">
+<h2><strong>Training data</strong></h2>
+<p> </p>
+<div>
+<ul>
+<li class="fragment">We therefore used a dataset available from
+<em>Universe Roboflow</em>
+<ul>
+<li class="fragment">containing nearly 5000 images</li>
+<li class="fragment">images taken in various conditions</li>
+<li class="fragment">annotation prepared for a <em>YOLO</em> model</li>
+</ul></li>
+</ul>
+</div>
+</section>
+<section class="slide level3">
+
+<div class="columns">
+<div class="column" style="width:33%;">
+<p><img
+data-src="../dataset/car/train/images/000005_jpg.rf.d730849ae93a7c211a7c8f57ed851028.jpg"
+width="100" /> <img
+data-src="../dataset/car/train/images/000007_jpg.rf.226fe0751cf8ba445b8f87970e70f606.jpg"
+width="100" /> <img
+data-src="../dataset/car/train/images/000008_jpg.rf.bd6ae6db0f8c0eb727706bc322ce21ae.jpg"
+width="100" /> <img
+data-src="../dataset/car/train/images/000009_jpg.rf.df4118d1d26fa7a25923521216cc2f64.jpg"
+width="100" /></p>
+</div><div class="column" style="width:33%;">
+<p><img
+data-src="../dataset/car/train/images/00000_00000_00000_png.rf.55d47572c5980af0892b0c2ada6dae77.jpg"
+width="100" /> <img
+data-src="../dataset/car/train/images/00000_00000_00012_png.rf.23f94508dba03ef2f8bd187da2ec9c26.jpg"
+width="100" /> <img
+data-src="../dataset/car/train/images/00000_00001_00000_png.rf.d8be1d69840721c7a2ee07ab55ab46e3.jpg"
+width="100" /> <img
+data-src="../dataset/car/train/images/00000_00001_00010_png.rf.b3a1f62105870b9b00c96091b5145d7f.jpg"
+width="100" /></p>
+</div><div class="column" style="width:33%;">
+<p><img
+data-src="../dataset/car/train/images/road861_png.rf.8dbdc6380d026da51ae1198bc6bbb703.jpg"
+width="100" /> <img
+data-src="../dataset/car/train/images/road80_png.rf.bc2551fd16d8c56a6978f0642e28b7bd.jpg"
+width="100" /></p>
+</div>
+</div>
+</section>
+
+<section id="compatibility-issues" class="title-slide slide level2">
+<h2><strong>Compatibility issues</strong></h2>
+<div>
+<ul>
+<li class="fragment">The NCS2 stick was discontinued in 2022</li>
+<li class="fragment">The last <em>OpenVINO</em> version supporting NCS2
+is version 2022.3</li>
+<li class="fragment">Similarily most of the SW on the Rasp. Pi4 has not
+been updated to maintain compatibility with <em>NCS2</em> and
+<em>OpenVINO</em> 2022.3</li>
+<li class="fragment">This was a constant problem throughout the
+development</li>
+</ul>
+</div>
+</section>
+
+<section id="compatibility-issues-1" class="title-slide slide level2">
+<h2><strong>Compatibility issues</strong></h2>
+<div>
+<ul>
+<li class="fragment">Compatibility issues caused significant
+delayes</li>
+<li class="fragment">This was partially because we had to downgrade
+libraries on our PC’s</li>
+<li class="fragment">Another complication turned up with the absence of
+an API of the <em>OpenVINO</em> package
+<ul>
+<li class="fragment">on newer versions the API handles the
+post-processing of the model’s output</li>
+<li class="fragment">with the older version we had to create a program
+to do the post-processing</li>
+</ul></li>
+</ul>
+</div>
+</section>
+</section>
+<section>
+<section id="video-streaming-pipeline" class="title-slide slide level1">
+<h1>Video Streaming Pipeline</h1>
+
+</section>
+<section id="streaming-architecture" class="title-slide slide level2">
+<h2><strong>Streaming Architecture</strong></h2>
+<p> </p>
+<pre><code>Camera → Preprocessing → UDP Stream → Receiver → Inference → Postprocessing</code></pre>
+<p><br />
+</p>
+<p><strong>Goal</strong>: Minimize end-to-end latency while maintaining
+detection quality</p>
+</section>
+
+<section id="why-udp-over-tcp" class="title-slide slide level2">
+<h2><strong>Why UDP over TCP?</strong></h2>
+<div>
+<ul>
+<li class="fragment"><strong>TCP</strong>: Connection-oriented,
+guaranteed delivery
+<ul>
+<li class="fragment">Retransmission on packet loss</li>
+<li class="fragment">Higher latency (~100-200ms overhead)</li>
+<li class="fragment">Not suitable for real-time video</li>
+</ul></li>
+<li class="fragment"><strong>UDP</strong>: Connectionless, best-effort
+delivery
+<ul>
+<li class="fragment">No retransmission delays</li>
+<li class="fragment">Lower latency (~20-50ms)</li>
+<li class="fragment">Acceptable frame drops for real-time
+applications</li>
+</ul></li>
+<li class="fragment"><span class="math inline">\Rightarrow</span>
+<strong>UDP chosen for real-time constraints</strong></li>
+</ul>
+</div>
+</section>
+
+<section id="ffmpeg-integration" class="title-slide slide level2">
+<h2><strong>FFmpeg Integration</strong></h2>
+<div>
+<ul>
+<li class="fragment"><p><strong>FFmpeg</strong>: Powerful multimedia
+framework for video encoding/decoding</p></li>
+<li class="fragment"><p>Hardware acceleration support</p></li>
+<li class="fragment"><p>Configurable compression parameters</p></li>
+<li class="fragment"><p><strong>Key Configuration:</strong></p>
+<ul>
+<li class="fragment"><strong>Codec</strong>: H.264
+(hardware-accelerated)</li>
+<li class="fragment"><strong>Resolution</strong>: 640×480 (optimized for
+inference)</li>
+<li class="fragment"><strong>Frame rate</strong>: 30 FPS</li>
+<li class="fragment"><strong>Bitrate</strong>: 2 Mbps (quality/bandwidth
+trade-off)</li>
+</ul></li>
+</ul>
+</div>
+</section>
+
+<section id="streaming-latency-breakdown"
+class="title-slide slide level2">
+<h2><strong>Streaming Latency Breakdown</strong></h2>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Latency</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Camera capture</td>
+<td>~30ms</td>
+</tr>
+<tr>
+<td>Encoding (H.264)</td>
+<td>~40ms</td>
+</tr>
+<tr>
+<td>Network (UDP)</td>
+<td>~30ms</td>
+</tr>
+<tr>
+<td>Decoding</td>
+<td>~35ms</td>
+</tr>
+<tr>
+<td><strong>Total streaming</strong></td>
+<td><strong>~135ms</strong></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section>
+<section id="preprocessing" class="title-slide slide level1">
+<h1>Preprocessing</h1>
+
+</section>
+<section id="image-preparation" class="title-slide slide level2">
+<h2><strong>Image Preparation</strong></h2>
+<div>
+<ol type="1">
+<li class="fragment"><strong>Frame extraction</strong> from video
+stream</li>
+<li class="fragment"><strong>Resizing</strong> to model input size
+(416×416 for YOLOv3-tiny)</li>
+<li class="fragment"><strong>Normalization</strong> (pixel values
+0-1)</li>
+<li class="fragment"><strong>Color space</strong> conversion (BGR →
+RGB)</li>
+</ol>
+</div>
+</section>
+
+<section id="preprocessing-code" class="title-slide slide level2">
+<h2><strong>Preprocessing Code</strong></h2>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> preprocess_frame(frame):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Resize to model input</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    resized <span class="op">=</span> cv2.resize(frame, (<span class="dv">416</span>, <span class="dv">416</span>))</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Normalize pixel values</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    normalized <span class="op">=</span> resized <span class="op">/</span> <span class="fl">255.0</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Convert color space</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    rgb <span class="op">=</span> cv2.cvtColor(normalized, cv2.COLOR_BGR2RGB)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Add batch dimension</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    input_tensor <span class="op">=</span> np.expand_dims(rgb, axis<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> input_tensor</span></code></pre></div>
+</section>
+
+<section id="preprocessing-optimization"
+class="title-slide slide level2">
+<h2><strong>Preprocessing Optimization</strong></h2>
+<div>
+<ul>
+<li class="fragment"><strong>Hardware acceleration</strong>: OpenCV with
+hardware backends</li>
+<li class="fragment"><strong>Memory management</strong>: Reuse buffers
+to avoid allocation</li>
+<li class="fragment"><strong>Minimal operations</strong>: Only essential
+transformations</li>
+</ul>
+<p><br />
+</p>
+<ul>
+<li class="fragment"><strong>Preprocessing latency</strong>: ~15ms</li>
+</ul>
+</div>
+</section>
+</section>
+<section>
+<section id="postprocessing" class="title-slide slide level1">
+<h1>Postprocessing</h1>
+
+</section>
+<section id="model-output-processing" class="title-slide slide level2">
+<h2><strong>Model Output Processing</strong></h2>
+<div>
+<ol type="1">
+<li class="fragment"><strong>Parse raw predictions</strong> from neural
+network</li>
+<li class="fragment"><strong>Apply confidence threshold</strong> (filter
+weak detections)</li>
+<li class="fragment"><strong>Non-Maximum Suppression</strong> (remove
+duplicate boxes)</li>
+<li class="fragment"><strong>Coordinate transformation</strong>
+(normalized → pixel coordinates)</li>
+</ol>
+</div>
+</section>
+
+<section id="non-maximum-suppression-nms"
+class="title-slide slide level2">
+<h2><strong>Non-Maximum Suppression (NMS)</strong></h2>
+<p><strong>Purpose:</strong> Eliminate overlapping bounding boxes for
+same object</p>
+<div>
+<ul>
+<li class="fragment">Calculate <strong>IoU</strong> (Intersection over
+Union) between boxes</li>
+<li class="fragment">Keep box with highest confidence</li>
+<li class="fragment">Suppress boxes with IoU &gt; threshold (0.4)</li>
+</ul>
+</div>
+</section>
+
+<section id="nms-implementation" class="title-slide slide level2">
+<h2><strong>NMS Implementation</strong></h2>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> non_max_suppression(boxes, scores, iou_threshold<span class="op">=</span><span class="fl">0.4</span>):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Sort by confidence score</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    indices <span class="op">=</span> np.argsort(scores)[::<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    keep <span class="op">=</span> []</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="bu">len</span>(indices) <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        current <span class="op">=</span> indices[<span class="dv">0</span>]</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        keep.append(current)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Calculate IoU with remaining boxes</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        ious <span class="op">=</span> calculate_iou(boxes[current], boxes[indices[<span class="dv">1</span>:]])</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Keep only boxes with IoU below threshold</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        indices <span class="op">=</span> indices[<span class="dv">1</span>:][ious <span class="op">&lt;</span> iou_threshold]</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> keep</span></code></pre></div>
+</section>
+
+<section id="visualization-output" class="title-slide slide level2">
+<h2><strong>Visualization &amp; Output</strong></h2>
+<div>
+<ul>
+<li class="fragment">Draw bounding boxes on frame</li>
+<li class="fragment">Add class labels and confidence scores</li>
+<li class="fragment">Color-coding by sign category</li>
+<li class="fragment">Optional: Send detection results to control
+system</li>
+</ul>
+<p><br />
+</p>
+<ul>
+<li class="fragment"><strong>Postprocessing latency</strong>: ~20ms</li>
+</ul>
+</div>
+</section>
+</section>
+<section>
+<section id="performance-analysis" class="title-slide slide level1">
+<h1>Performance Analysis</h1>
+
+</section>
+<section id="end-to-end-latency-breakdown"
+class="title-slide slide level2">
+<h2>End-to-End Latency Breakdown</h2>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Latency</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Streaming (capture + network)</td>
+<td>135 ms</td>
+</tr>
+<tr>
+<td>Preprocessing</td>
+<td>15 ms</td>
+</tr>
+<tr>
+<td>Inference (NCS2)</td>
+<td>180 ms</td>
+</tr>
+<tr>
+<td>Postprocessing</td>
+<td>20 ms</td>
+</tr>
+<tr>
+<td>Visualization</td>
+<td>150 ms</td>
+</tr>
+<tr>
+<td><strong>Total end-to-end</strong></td>
+<td><strong>~500 ms</strong></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+<section id="technical-trade-offs" class="title-slide slide level2">
+<h2><strong>Technical Trade-offs</strong></h2>
+<p><strong>Alternative Approaches Considered:</strong></p>
+<div>
+<ul>
+<li class="fragment"><strong>TCP Streaming</strong>: +150ms latency,
+rejected</li>
+<li class="fragment"><strong>Local Processing</strong>: CPU too slow
+(~2s inference)</li>
+<li class="fragment"><strong>Higher Resolution</strong>: +300ms latency,
+not worth it</li>
+<li class="fragment"><strong>Larger Model</strong> (YOLOv3 full): +400ms
+inference, too slow</li>
+</ul>
+</div>
+</section>
+
+<section id="optimization-strategies" class="title-slide slide level2">
+<h2><strong>Optimization Strategies</strong></h2>
+<div>
+<ol type="1">
+<li class="fragment"><strong>UDP streaming</strong>: Reduced network
+latency</li>
+<li class="fragment"><strong>H.264 hardware encoding</strong>: Fast
+compression</li>
+<li class="fragment"><strong>YOLOv3-tiny</strong>: Lightweight
+model</li>
+<li class="fragment"><strong>NCS2 acceleration</strong>: Offload from
+CPU</li>
+<li class="fragment"><strong>Buffer reuse</strong>: Minimize memory
+allocation</li>
+</ol>
+</div>
+</section>
+
+<section id="achieved-performance" class="title-slide slide level2">
+<h2><strong>Achieved Performance</strong></h2>
+<div>
+<ul>
+<li class="fragment"><strong>Latency</strong>: ~500ms end-to-end</li>
+<li class="fragment"><strong>Frame rate</strong>: ~29 FPS (detection
+rate)</li>
+<li class="fragment"><strong>Detection accuracy</strong>: 85-90% (good
+conditions)</li>
+<li class="fragment"><strong>Real-time operation</strong>: Suitable for
+vehicle speeds &lt;20 km/h</li>
+</ul>
+</div>
+</section>
+
+<section id="future-improvements" class="title-slide slide level2">
+<h2><strong>Future Improvements</strong></h2>
+<div>
+<ul>
+<li class="fragment"><strong>Model optimization</strong>: Quantization,
+pruning</li>
+<li class="fragment"><strong>Resolution scaling</strong>: Dynamic
+adjustment based on speed</li>
+<li class="fragment"><strong>Hardware upgrade</strong>: Newer edge AI
+accelerators</li>
+<li class="fragment"><strong>Multi-threading</strong>: Parallel
+preprocessing/postprocessing</li>
+<li class="fragment"><strong>Target latency</strong>: &lt;300ms</li>
+</ul>
+</div>
+</section>
+
+<section id="tasks-completed" class="title-slide slide level2">
+<h2><strong>Tasks completed</strong></h2>
+<div>
+<p><strong>Streaming and dealing with the camera</strong>: ~ 5h</p>
+<ul>
+<li class="fragment">5h</li>
+</ul>
+<p><strong>Neural network</strong>: ~ 10h</p>
+<ul>
+<li class="fragment">10h</li>
+</ul>
+</div>
+</section>
+<section class="slide level3">
+
+<div>
+<p><strong>Implementation of the Neural network on the raspberry
+pi</strong>: ~ 5h</p>
+<ul>
+<li class="fragment">5h</li>
+</ul>
+<p><strong>Error handling, compatibility issues</strong>: ~ 1h</p>
+<ul>
+<li class="fragment"><strong>20h</strong></li>
+</ul>
+</div>
+</section>
+</section>
+<section>
+<section id="questions" class="title-slide slide level1">
+<h1>Questions?</h1>
+
+</section>
+<section id="sources" class="title-slide slide level2">
+<h2><strong>Sources</strong></h2>
+<p><strong>Raspberry Pi4:</strong>
+https://asset.conrad.com/media10/isa/160267/c1/-/cs/002138864PI00/image.jpg</p>
+<p><strong>NCS2:</strong>
+https://res.cloudinary.com/rsc/image/upload/b_rgb:FFFFFF,c_pad,dpr_2.625,f_auto,h_214,q_auto,w_380/c_pad,h_214,w_380/R1811851-02?pgw=1</p>
+<p><strong>Dataset:</strong>
+https://universe.roboflow.com/selfdriving-car-qtywx/self-driving-cars-lfjou</p>
+</section>
+</section>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/reveal.js@^4/dist/reveal.js"></script>
+
+  <!-- reveal.js plugins -->
+  <script src="https://unpkg.com/reveal.js@^4/plugin/notes/notes.js"></script>
+  <script src="https://unpkg.com/reveal.js@^4/plugin/search/search.js"></script>
+  <script src="https://unpkg.com/reveal.js@^4/plugin/zoom/zoom.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: true,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'bottom-right',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: true,
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: false,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: true,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'default',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: true,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'slide',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'fade',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // reveal.js plugins
+        plugins: [
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    </body>
+</html>

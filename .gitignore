@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+ov2022/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Dataset (download from Roboflow, see README)
+dataset/
+
+# Training runs (results kept in training_results/)
+runs/
+
+# Inference output
+output/
+
+# Models too large for git (keep in models/ only the essentials)
+yolo11n.pt
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary / duplicate files
+test (copy).py
+TMP_presentationSlides_LP.md
+
+# Presentation files (not part of the project)
+pres/
